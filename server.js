@@ -1,20 +1,9 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+// Import the main application from app.js
+const app = require('./src/app');
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const PORT = process.env.PORT || 3001;
 
-// Mount API routes
-const authRoutes = require('./src/api/routes/auth.routes');
-app.use('/api/auth', authRoutes);
-
-app.get('/', (req, res) => {
-	res.json({ status: 'ok', time: new Date().toISOString() });
-});
-
-const PORT = process.env.PORT || 3000;
+// Start the server
 app.listen(PORT, () => {
-	console.log(`Server listening on port ${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

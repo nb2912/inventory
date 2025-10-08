@@ -1,29 +1,21 @@
-const db = require('../../config/db'); // Correct path to your db config
+const db = require('../../config/db');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
-const saltRounds = 10;
-
-// User Signup Logic
+// Signup logic
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
 
-  // Basic validation
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required.' });
   }
 
   try {
-    // Check if user already exists
     const [existingUsers] = await db.query('SELECT email FROM users WHERE email = ?', [email]);
     if (existingUsers.length > 0) {
       return res.status(409).json({ message: 'Email already in use.' });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Save the new user to the database
+    const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await db.query('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword]);
     
     res.status(201).json({ message: 'User created successfully!', userId: result.insertId });
@@ -34,7 +26,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-// User Login Logic
+// Login logic
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -43,39 +35,54 @@ exports.login = async (req, res) => {
   }
 
   try {
-    // Find the user by email
     const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
     if (users.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials.' }); // User not found
+      return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
     const user = users[0];
-
-    // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials.' }); // Wrong password
+      return res.status(401).json({ message: 'Invalid credentials.' });
     }
 
-    // If passwords match, create a JWT
-    const payload = {
+    // Create session
+    req.session.user = {
       userId: user.id,
-      email: user.email
+      email: user.email,
+      role: user.role
     };
-
-    const token = jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' } // Token expires in 1 hour
-    );
 
     res.status(200).json({
       message: 'Logged in successfully!',
-      token: token
+      user: req.session.user
     });
 
-  } catch (error) {
+  } catch (error)
+ {
     console.error('Login error:', error);
     res.status(500).json({ message: 'An error occurred during the login process.' });
   }
 };
+
+// Logout logic
+exports.logout = (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.status(500).json({ message: 'Could not log out, please try again.' });
+    }
+    res.clearCookie('connect.sid');
+    res.status(200).json({ message: 'Logged out successfully.' });
+  });
+};
+
+// Get profile logic
+exports.getProfile = (req, res) => {
+    // The 'protect' middleware already checked if the user is logged in.
+    // We can just send back the user info from the session.
+    res.status(200).json({
+        message: 'Profile data fetched successfully.',
+        user: req.session.user
+    });
+};
+
