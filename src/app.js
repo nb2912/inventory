@@ -1,10 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-const session = require('express-session'); // <-- 1. Import express-session
+const session = require('express-session');
 
 // Import your routes
 const authRoutes = require('./api/routes/auth.routes');
-const userRoutes = require('./api/routes/user.routes'); // <-- 2. Import user routes
+const userRoutes = require('./api/routes/user.routes');
+const itemRoutes = require('./api/routes/item.routes'); // <-- 1. Import item routes
 
 // Create the Express app
 const app = express();
@@ -15,7 +16,7 @@ app.use(cors());
 // Enable the Express app to parse JSON requests
 app.use(express.json());
 
-// 3. Add and configure the session middleware
+// Add and configure the session middleware
 app.use(
   session({
     secret: process.env.SESSION_SECRET, // Secret key to sign the session ID cookie
@@ -33,7 +34,8 @@ app.use(
 // This tells the app that for any URL starting with /api/auth,
 // it should use the routes defined in auth.routes.js
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes); // <-- 4. Use the user routes for admin functionality
+app.use('/api/users', userRoutes);
+app.use('/api/items', itemRoutes); // <-- 2. Use the item routes
 
 
 // A simple root route for testing if the server is up
