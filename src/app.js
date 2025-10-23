@@ -20,9 +20,6 @@ const app = express();
 app.use(cors());
 // Enable the Express app to parse JSON requests
 app.use(express.json());
-// Serve static files from both root and public directory
-app.use(express.static('./'));
-app.use(express.static('src/public'));
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
 
@@ -52,16 +49,13 @@ app.use('/api/categories', categoryRoutes); // Use the category routes
 app.use('/api/barcodes', barcodeRoutes); // Use the barcode routes
 app.use('/api/reports', reportRoutes); // Use the report routes
 
-// Serve the frontend for any other route
-app.get('/', (req, res) => {
-  res.sendFile('index.html', { root: 'src/public' });
-});
-
-
-// A simple root route for testing if the server is up
+// Root route to confirm API is running
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Inventory Management API!' });
 });
+
+
+
 
 // Export the app so server.js can use it
 module.exports = app;
