@@ -11,6 +11,9 @@ const alertRoutes = require('./api/routes/alert.routes'); // Import alert routes
 const categoryRoutes = require('./api/routes/category.routes'); // Import category routes
 const barcodeRoutes = require('./api/routes/barcode.routes'); // Import barcode routes
 const reportRoutes = require('./api/routes/report.routes'); // Import report routes
+const supplierRoutes = require('./api/routes/supplier.routes'); // Import supplier routes
+const purchaseOrderRoutes = require('./api/routes/purchaseOrder.routes'); // Import PO routes
+const salesOrderRoutes = require('./api/routes/salesOrder.routes'); // Import SO routes
 
 // Create the Express app
 const app = express();
@@ -48,6 +51,9 @@ app.use('/api/alerts', alertRoutes); // Use the alert routes
 app.use('/api/categories', categoryRoutes); // Use the category routes
 app.use('/api/barcodes', barcodeRoutes); // Use the barcode routes
 app.use('/api/reports', reportRoutes); // Use the report routes
+app.use('/api/suppliers', supplierRoutes); // Use the supplier routes
+app.use('/api/purchase-orders', purchaseOrderRoutes); // Use the PO routes
+app.use('/api/sales-orders', salesOrderRoutes); // Use the SO routes
 
 // Root route to confirm API is running
 app.get('/', (req, res) => {
