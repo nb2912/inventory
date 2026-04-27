@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <link rel="stylesheet" href="/style/style.css">
+</head>
+<body>
+    <div id="app">
+        <nav>
+            <ul>
+                <li><a href="#" data-page="dashboard">Dashboard</a></li>
+                <li><a href="#" data-page="items">Items</a></li>
+                <li><a href="#" data-page="suppliers">Suppliers</a></li>
+                <li><a href="#" data-page="purchase-orders">Purchase Orders</a></li>
+                <li><a href="#" data-page="sales-orders">Sales Orders</a></li>
+                <li><a href="#" data-page="alerts">Alerts</a></li>
+                <li><a href="#" data-page="reports">Reports</a></li>
+                <li><a href="#" data-page="users">Users</a></li>
+                <li><a href="#" id="logout-btn">Logout</a></li>
+            </ul>
+        </nav>
+        <main id="main-content">
+            <!-- Pages will be rendered here -->
+        </main>
+    </div>
+
+    <div id="login-page">
+        <h2>Login</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <script src="/js/main.js"></script>
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/items.js"></script>
+    <script src="/js/suppliers.js"></script>
+    <script src="/js/purchase-orders.js"></script>
+    <script src="/js/sales-orders.js"></script>
+    <script src="/js/alerts.js"></script>
+    <script src="/js/reports.js"></script>
+    <script src="/js/users.js"></script>
+</body>
+</html>

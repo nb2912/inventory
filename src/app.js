@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
@@ -40,6 +41,20 @@ app.use(
 );
 
 
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    // It's an API request, let the next middleware handle it
+    return next();
+  }
+  // It's a frontend request, serve the index.html file
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
+
+
 // --- Routes ---
 // This tells the app that for any URL starting with /api/auth,
 // it should use the routes defined in auth.routes.js
@@ -54,14 +69,6 @@ app.use('/api/reports', reportRoutes); // Use the report routes
 app.use('/api/suppliers', supplierRoutes); // Use the supplier routes
 app.use('/api/purchase-orders', purchaseOrderRoutes); // Use the PO routes
 app.use('/api/sales-orders', salesOrderRoutes); // Use the SO routes
-
-// Root route to confirm API is running
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Inventory Management API!' });
-});
-
-
-
 
 // Export the app so server.js can use it
 module.exports = app;
