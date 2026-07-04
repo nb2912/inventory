@@ -90,3 +90,46 @@ exports.getAllItems = async (req, res) => {
     res.status(500).json({ message: 'An error occurred while fetching items.' });
   }
 };
+
+exports.getItemById = async (req, res) => {
+  try {
+    const [items] = await db.query('SELECT * FROM items WHERE id = ?', [req.params.id]);
+    if (items.length === 0) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.status(200).json({ status: 'success', data: { item: items[0] } });
+  } catch (error) {
+    console.error("Error fetching item:", error);
+    res.status(500).json({ message: 'An error occurred while fetching the item.' });
+  }
+};
+
+exports.updateItem = async (req, res) => {
+  const { name, quantity, price, category, description } = req.body;
+  try {
+    const [result] = await db.query(
+      'UPDATE items SET name = ?, quantity = ?, price = ?, category = ?, description = ? WHERE id = ?',
+      [name, quantity, price, category || null, description || null, req.params.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.status(200).json({ message: 'Item updated successfully!' });
+  } catch (error) {
+    console.error('Error updating item:', error);
+    res.status(500).json({ message: 'An error occurred while updating the item.' });
+  }
+};
+
+exports.deleteItem = async (req, res) => {
+  try {
+    const [result] = await db.query('DELETE FROM items WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.status(200).json({ message: 'Item deleted successfully!' });
+  } catch (error) {
+    console.error('Error deleting item:', error);
+    res.status(500).json({ message: 'An error occurred while deleting the item.' });
+  }
+};
