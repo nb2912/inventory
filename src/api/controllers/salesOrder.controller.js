@@ -97,3 +97,97 @@ exports.getSalesOrderById = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server Error' });
     }
 };
+
+// @desc    Update the status of a sales order
+// @route   PATCH /api/sales-orders/:id/status
+exports.updateOrderStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const validStatuses = ['Pending', 'Fulfilled', 'Cancelled'];
+
+  if (!status || !validStatuses.includes(status)) {
+    return res.status(400).json({ success: false, message: 'Invalid status provided.' });
+  }
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(
+      'UPDATE sales_orders SET status = ? WHERE id = ?',
+      [status, id]
+    );
+
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'Sales order not found.' });
+    }
+
+    // If cancelled, restore stock
+    if (status === 'Cancelled') {
+      const [items] = await connection.query(
+        'SELECT item_id, quantity FROM sales_order_items WHERE sales_order_id = ?',
+        [id]
+      );
+
+      for (const item of items) {
+        await connection.query(
+          'UPDATE items SET quantity = quantity + ? WHERE id = ?',
+          [item.quantity, item.item_id]
+        );
+      }
+    }
+
+    await connection.commit();
+    res.status(200).json({ success: true, message: `Sales order status updated to ${status}` });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error updating SO status:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  } finally {
+    connection.release();
+  }
+};
+
+// @desc    Delete a sales order
+// @route   DELETE /api/sales-orders/:id
+exports.deleteSalesOrder = async (req, res) => {
+  const { id } = req.params;
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Revert inventory (Assuming delete implies canceling the order)
+    const [items] = await connection.query(
+      'SELECT item_id, quantity FROM sales_order_items WHERE sales_order_id = ?',
+      [id]
+    );
+
+    for (const item of items) {
+      await connection.query(
+        'UPDATE items SET quantity = quantity + ? WHERE id = ?',
+        [item.quantity, item.item_id]
+      );
+    }
+
+    // Delete items
+    await connection.query('DELETE FROM sales_order_items WHERE sales_order_id = ?', [id]);
+    
+    // Delete order
+    const [result] = await connection.query('DELETE FROM sales_orders WHERE id = ?', [id]);
+    
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'Sales order not found' });
+    }
+
+    await connection.commit();
+    res.status(200).json({ success: true, message: 'Sales order deleted successfully' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error deleting sales order:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  } finally {
+    connection.release();
+  }
+};

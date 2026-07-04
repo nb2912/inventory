@@ -12,6 +12,11 @@ router
   .post(soController.createSalesOrder)
   .get(soController.getAllSalesOrders);
 
-router.route('/:id').get(soController.getSalesOrderById);
+router.route('/:id')
+  .get(soController.getSalesOrderById)
+  .delete(soController.deleteSalesOrder);
+
+router.route('/:id/status')
+  .patch(soController.updateOrderStatus);
 
 module.exports = router;
