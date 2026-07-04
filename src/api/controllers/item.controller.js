@@ -3,7 +3,7 @@ const db = require('../../config/db');
 exports.addItem = async (req, res) => {
   const { serial_no, name, quantity, price, category, description } = req.body;
 
-  if (!serial_no || !name || !quantity || !price) {
+  if (!serial_no || !name || quantity === undefined || quantity === '' || price === undefined || price === '') {
     return res.status(400).json({ message: 'All fields are required.' });
   }
 

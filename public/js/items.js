@@ -15,6 +15,10 @@ function renderItems() {
                 <input type="number" id="quantity" name="quantity" required>
             </div>
             <div class="form-group">
+                <label for="price">Estimated Price ($)</label>
+                <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+            <div class="form-group">
                 <label for="category">Category (e.g., Fridge, Bathroom)</label>
                 <input type="text" id="category" name="category">
             </div>
@@ -35,6 +39,7 @@ function renderItems() {
                 <tr>
                     <th>Name</th>
                     <th>Category</th>
+                    <th>Price</th>
                     <th>Quantity</th>
                     <th>Notes</th>
                 </tr>
@@ -52,7 +57,6 @@ function renderItems() {
         const itemData = Object.fromEntries(formData.entries());
         // Auto-generate missing fields for business logic
         itemData.serial_no = 'H-' + Date.now().toString();
-        itemData.price = 0;
 
         try {
             const res = await fetch('/api/items', {
@@ -88,6 +92,7 @@ function renderItems() {
                         <tr>
                             <td>${item.name}</td>
                             <td>${item.category || ''}</td>
+                            <td>$${item.price}</td>
                             <td>
                                 <button class="btn-sm" onclick="window.updateHouseholdQuantity(${item.id}, ${item.quantity - 1})" ${item.quantity <= 0 ? 'disabled' : ''}>-</button>
                                 <span style="margin: 0 10px; font-weight: bold;">${item.quantity}</span>

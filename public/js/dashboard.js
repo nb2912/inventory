@@ -14,7 +14,7 @@ function renderDashboard() {
                             <p>${stats.totalItems}</p>
                         </div>
                         <div>
-                            <h3>Inventory Value</h3>
+                            <h3>Total Budget Value</h3>
                             <p>$${stats.inventoryValue.toFixed(2)}</p>
                         </div>
                         <div>
