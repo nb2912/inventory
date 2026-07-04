@@ -144,3 +144,63 @@ exports.updateOrderStatus = async (req, res) => {
     connection.release();
   }
 };
+
+// @desc    Update purchase order details
+// @route   PUT /api/purchase-orders/:id
+exports.updatePurchaseOrder = async (req, res) => {
+  const { expected_delivery_date } = req.body;
+  try {
+    const [result] = await db.query(
+      'UPDATE purchase_orders SET expected_delivery_date = ? WHERE id = ?',
+      [expected_delivery_date, req.params.id]
+    );
+    if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Purchase order not found' });
+    res.status(200).json({ success: true, message: 'Purchase order updated successfully' });
+  } catch (error) {
+    console.error('Error updating purchase order:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+// @desc    Delete a purchase order
+// @route   DELETE /api/purchase-orders/:id
+exports.deletePurchaseOrder = async (req, res) => {
+  const { id } = req.params;
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+    
+    // If it was already received, we might need to deduct stock back. 
+    const [order] = await connection.query('SELECT status FROM purchase_orders WHERE id = ?', [id]);
+    
+    if (order.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ success: false, message: 'Purchase order not found' });
+    }
+    
+    if (order[0].status === 'Received') {
+      const [items] = await connection.query(
+        'SELECT item_id, quantity FROM purchase_order_items WHERE purchase_order_id = ?',
+        [id]
+      );
+      for (const item of items) {
+        await connection.query(
+          'UPDATE items SET quantity = quantity - ? WHERE id = ?',
+          [item.quantity, item.item_id]
+        );
+      }
+    }
+
+    await connection.query('DELETE FROM purchase_order_items WHERE purchase_order_id = ?', [id]);
+    await connection.query('DELETE FROM purchase_orders WHERE id = ?', [id]);
+
+    await connection.commit();
+    res.status(200).json({ success: true, message: 'Purchase order deleted successfully' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error deleting purchase order:', error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  } finally {
+    connection.release();
+  }
+};

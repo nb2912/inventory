@@ -12,7 +12,10 @@ router
   .post(poController.createPurchaseOrder)
   .get(poController.getAllPurchaseOrders);
 
-router.route('/:id').get(poController.getPurchaseOrderById);
+router.route('/:id')
+  .get(poController.getPurchaseOrderById)
+  .put(poController.updatePurchaseOrder)
+  .delete(poController.deletePurchaseOrder);
 
 router.route('/:id/status').patch(poController.updateOrderStatus);
 
