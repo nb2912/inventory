@@ -91,6 +91,23 @@ exports.getAllItems = async (req, res) => {
   }
 };
 
+exports.updateQuantity = async (req, res) => {
+  const { quantity } = req.body;
+  try {
+    const [result] = await db.query(
+      'UPDATE items SET quantity = ? WHERE id = ?',
+      [quantity, req.params.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+    res.status(200).json({ message: 'Quantity updated successfully!' });
+  } catch (error) {
+    console.error('Error updating quantity:', error);
+    res.status(500).json({ message: 'An error occurred while updating the quantity.' });
+  }
+};
+
 exports.getItemById = async (req, res) => {
   try {
     const [items] = await db.query('SELECT * FROM items WHERE id = ?', [req.params.id]);

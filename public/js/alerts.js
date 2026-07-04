@@ -1,10 +1,10 @@
 function renderAlerts() {
     const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = '<h2>Alerts</h2>';
+    mainContent.innerHTML = '<h2>Shopping List</h2>';
 
     // Low stock alerts
     const lowStockAlerts = `
-        <h3>Low Stock Alerts</h3>
+        <h3>Need to Buy</h3>
         <table id="low-stock-alerts-table">
             <thead>
                 <tr>

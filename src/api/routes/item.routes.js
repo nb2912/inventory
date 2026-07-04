@@ -9,6 +9,7 @@ router.post('/', protect, restrictTo('admin'), itemController.addItem);
 router.get('/', itemController.getAllItems);
 router.get('/:id', itemController.getItemById);
 router.put('/:id', protect, restrictTo('admin'), itemController.updateItem);
+router.patch('/:id/quantity', protect, restrictTo('admin'), itemController.updateQuantity);
 router.delete('/:id', protect, restrictTo('admin'), itemController.deleteItem);
 
 module.exports = router;

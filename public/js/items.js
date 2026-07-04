@@ -1,17 +1,13 @@
 function renderItems() {
     const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = '<h2>Items</h2>';
+    mainContent.innerHTML = '<h2>My Pantry</h2>';
 
     // Add item form
     const addItemForm = `
         <form id="add-item-form">
             <h3>Add New Item</h3>
             <div class="form-group">
-                <label for="serial_no">Serial No</label>
-                <input type="text" id="serial_no" name="serial_no" required>
-            </div>
-            <div class="form-group">
-                <label for="name">Name</label>
+                <label for="name">Name (e.g., Milk, Soap)</label>
                 <input type="text" id="name" name="name" required>
             </div>
             <div class="form-group">
@@ -19,34 +15,28 @@ function renderItems() {
                 <input type="number" id="quantity" name="quantity" required>
             </div>
             <div class="form-group">
-                <label for="price">Price</label>
-                <input type="number" id="price" name="price" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label for="category">Category</label>
+                <label for="category">Category (e.g., Fridge, Bathroom)</label>
                 <input type="text" id="category" name="category">
             </div>
             <div class="form-group">
-                <label for="description">Description</label>
+                <label for="description">Notes / Description</label>
                 <textarea id="description" name="description"></textarea>
             </div>
-            <button type="submit">Add Item</button>
+            <button type="submit">Add to Pantry</button>
         </form>
     `;
     mainContent.innerHTML += addItemForm;
 
     // Item table
     const itemTable = `
-        <h3>All Items</h3>
+        <h3>All Stuff</h3>
         <table id="items-table">
             <thead>
                 <tr>
-                    <th>Serial No</th>
                     <th>Name</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
                     <th>Category</th>
-                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Notes</th>
                 </tr>
             </thead>
             <tbody>
@@ -60,6 +50,9 @@ function renderItems() {
         e.preventDefault();
         const formData = new FormData(addItemFormElement);
         const itemData = Object.fromEntries(formData.entries());
+        // Auto-generate missing fields for business logic
+        itemData.serial_no = 'H-' + Date.now().toString();
+        itemData.price = 0;
 
         try {
             const res = await fetch('/api/items', {
@@ -93,12 +86,14 @@ function renderItems() {
                 items.forEach(item => {
                     const row = `
                         <tr>
-                            <td>${item.serial_no}</td>
                             <td>${item.name}</td>
-                            <td>${item.quantity}</td>
-                            <td>${item.price}</td>
-                            <td>${item.category}</td>
-                            <td>${item.description}</td>
+                            <td>${item.category || ''}</td>
+                            <td>
+                                <button class="btn-sm" onclick="window.updateHouseholdQuantity(${item.id}, ${item.quantity - 1})" ${item.quantity <= 0 ? 'disabled' : ''}>-</button>
+                                <span style="margin: 0 10px; font-weight: bold;">${item.quantity}</span>
+                                <button class="btn-sm" onclick="window.updateHouseholdQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                            </td>
+                            <td>${item.description || ''}</td>
                         </tr>
                     `;
                     tableBody.innerHTML += row;
@@ -112,3 +107,24 @@ function renderItems() {
             alert('An error occurred while fetching items.');
         });
 }
+
+// Global function so onclick works
+window.updateHouseholdQuantity = async function(id, newQuantity) {
+    try {
+        const res = await fetch(`/api/items/${id}/quantity`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: newQuantity })
+        });
+        if (res.ok) {
+            renderItems(); // re-render to show updated quantities
+        } else {
+            alert('Could not update quantity');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('An error occurred.');
+    }
+};
