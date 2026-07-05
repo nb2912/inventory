@@ -17,8 +17,7 @@ exports.getAllSuppliers = async (req, res) => {
   }
 };
 
-// @desc    Get single supplier
-// @route   GET /api/suppliers/:id
+
 exports.getSupplierById = async (req, res) => {
   try {
     const [supplier] = await db.query('SELECT * FROM suppliers WHERE id = ?', [req.params.id]);
