@@ -32,8 +32,6 @@ exports.getSupplierById = async (req, res) => {
   }
 };
 
-// @desc    Create a new supplier
-// @route   POST /api/suppliers
 exports.createSupplier = async (req, res) => {
   const { name, contact_person, email, phone, address } = req.body;
 
